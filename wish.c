@@ -32,13 +32,13 @@ int main(int argc, char *argv[]) {
             freopen(argv[1], "r", stdin);
         }
         else {
-            printf("Invalid arguments: Invalid batch file provided\n");
-            exit(3);
+            write(stderr, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+            exit(1);
         }
     }
     else if(argc > 2) {
-        printf("Invalid arguments: WISH accepts at most 1 argument\n");
-        exit(3);
+        write(stderr, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+        exit(1);
     }
 
     // ---MAIN SHELL LOOP---
