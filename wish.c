@@ -1,8 +1,3 @@
-/**
- * Exit codes:
- * 3 - Incorrect args given to wish
- */
-
 // ---INCLUDES---
 #include "builtins.h"
 #include "utils.h"
@@ -30,6 +25,7 @@ int main(int argc, char *argv[]) {
         // Check for valid batch file
         if(checkBatch(argv[1])) {
             freopen(argv[1], "r", stdin);
+            batchMode = 1;
         }
         else {
             write(stderr, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
