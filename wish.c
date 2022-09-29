@@ -1,4 +1,5 @@
 // ---INCLUDES---
+
 #include "builtIns.h"
 #include "utils.h"
 #include <stdio.h>
@@ -6,7 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 
+
 // ---DEFINES---
+
 #define DEBUG 1
 
 
@@ -19,11 +22,22 @@ int main(int argc, char *argv[]) {
     const char ERROR_MESSAGE[30] = "An error has occurred\n";
     const int STDOUT = 1;
 
+
     // ---SHELL STATE VARIABLES---
 
     int batchMode = 0;
 
-    // TODO: Set up shell read source
+
+    // ---SHELL READ BUFFER SETUP---
+
+    size_t buffer_size = 32;
+    char* buffer = malloc(buffer_size * sizeof(char));
+    if(buffer == NULL) {
+        write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+        exit(1);
+    }
+
+
     // ---READ SOURCE SETUP---
 
     // Batch file potentially provided
@@ -49,21 +63,26 @@ int main(int argc, char *argv[]) {
         printf("%s\n",str);
     }
 
+
     // ---MAIN SHELL LOOP---
 
     while(1) {
 
-        // Wish prompt
+        // ---WISH PROMPT---
         if(!batchMode) {
             printf("wish>");
         }
 
 
-        // TODO: Get user input
+        // ---USER INPUT---
 
+        // Check for EOF
+        if(feof(stdin)) {
+            exit(0);
+        }
 
-        // TODO: Check for EOF
-
+        getline(&buffer, &buffer_size, stdin);
+        
 
         // TODO: Tokenize user input
 
