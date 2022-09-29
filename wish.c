@@ -8,9 +8,6 @@
 
 // ---DEFINES---
 #define DEBUG 1
-#ifdef DEBUG
-#define DEBUG_EXIT() exit(0)
-#endif
 
 
 // ---SHELL ENTRY---
@@ -43,6 +40,13 @@ int main(int argc, char *argv[]) {
     else if(argc > 2) {
         write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
         exit(1);
+    }
+
+    if(DEBUG) {
+        size_t size = 10;
+        char* str = malloc(size);
+        getline(&str,&size,stdin);
+        printf("%s\n",str);
     }
 
     // ---MAIN SHELL LOOP---
@@ -83,6 +87,8 @@ int main(int argc, char *argv[]) {
 
         // TODO: Handle code returned by command
 
-        DEBUG_EXIT();
+        if(DEBUG) {
+            exit(0);
+        }
     }
 }
