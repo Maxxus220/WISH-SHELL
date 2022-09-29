@@ -2,8 +2,10 @@
  * Methods for all built in shell commands
  */
 
-void exitShell(void);
+void shell_exit(void);
 
-int cd(char*[]);
+int shell_cd(char*[]);
 
-int path(char*[]);
+int shell_path(char*[]);
+
+int shell_if(char*[]);
