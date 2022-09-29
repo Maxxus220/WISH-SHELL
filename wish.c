@@ -3,6 +3,12 @@
 #include "utils.h"
 #include "stdio.h"
 
+// ---DEFINES---
+#define DEBUG 1
+#ifdef DEBUG
+#define DEBUG_EXIT() exit(0)
+#endif
+
 
 // ---SHELL ENTRY---
 
@@ -23,8 +29,7 @@ int main(int argc, char *argv[]) {
     // Batch file potentially provided
     if(argc == 2) {
         // Check for valid batch file
-        if(checkBatch(argv[1])) {
-            freopen(argv[1], "r", stdin);
+        if(freopen(argv[1], "r", stdin) != NULL) {
             batchMode = 1;
         }
         else {
@@ -40,10 +45,17 @@ int main(int argc, char *argv[]) {
     // ---MAIN SHELL LOOP---
 
     while(1) {
-        // Wait for input
+
+        // Wish prompt
+        if(!batchMode) {
+            printf("wish>");
+        }
 
 
         // TODO: Get user input
+
+
+        // TODO: Check for EOF
 
 
         // TODO: Tokenize user input
@@ -67,5 +79,7 @@ int main(int argc, char *argv[]) {
 
 
         // TODO: Handle code returned by command
+
+        DEBUG_EXIT();
     }
 }
