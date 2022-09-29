@@ -4,7 +4,6 @@
  * Contains commands for various wish shell checks
  */
 
-int checkBatch(char* batchFile) {
+void cleanUp(void) {
 
-    return -1;
 }
