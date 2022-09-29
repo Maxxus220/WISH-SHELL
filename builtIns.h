@@ -2,7 +2,7 @@
  * Methods for all built in shell commands
  */
 
-void exit(void);
+void exitShell(void);
 
 int cd(char*[]);
 

@@ -1,8 +1,11 @@
+#include "builtIns.h"
+#include <stdlib.h>
+
 /**
  * Methods for all built in shell commands
  */
 
-void exit(void) {
+void exitShell(void) {
     exit(0);
 }
 

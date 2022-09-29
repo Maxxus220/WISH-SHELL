@@ -1,7 +1,10 @@
 // ---INCLUDES---
-#include "builtins.h"
+#include "builtIns.h"
 #include "utils.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 // ---DEFINES---
 #define DEBUG 1
@@ -33,12 +36,12 @@ int main(int argc, char *argv[]) {
             batchMode = 1;
         }
         else {
-            write(stderr, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+            write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
             exit(1);
         }
     }
     else if(argc > 2) {
-        write(stderr, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+        write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
         exit(1);
     }
 
