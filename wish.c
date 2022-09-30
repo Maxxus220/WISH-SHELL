@@ -56,12 +56,12 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    if(DEBUG) {
-        size_t size = 10;
-        char* str = malloc(size);
-        getline(&str,&size,stdin);
-        printf("%s\n",str);
-    }
+    // if(DEBUG) {
+    //     size_t size = 10;
+    //     char* str = malloc(size);
+    //     getline(&str,&size,stdin);
+    //     printf("%s\n",str);
+    // }
 
 
     // ---MAIN SHELL LOOP---
@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
 
 
         // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
+        // TODO: Need to reset stdout after each loop
         int redirIndex = -1;
         for(int i = 0; i < token_count; i++) {
             if(strcmp(tokens[i], ">") == 0) {
@@ -117,6 +118,12 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        if(DEBUG) {
+            for(int i = 0; i < token_count; i++) {
+                printf("%s\n",tokens[i]);
+            }
+        }
+
         // TODO: Run corresponding command and check for valid command
             // TODO: Check for empty command
 
@@ -133,8 +140,8 @@ int main(int argc, char *argv[]) {
 
         // TODO: Handle code returned by command
 
-        if(DEBUG) {
-            exit(0);
-        }
+        // if(DEBUG) {
+        //     exit(0);
+        // }
     }
 }
