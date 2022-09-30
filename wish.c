@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     int batchMode = 0;
 
 
-    // ---SHELL READ BUFFER SETUP---
+    // ---SHELL INPUT SETUP---
 
     size_t buffer_size = 32;
     char* buffer = malloc(buffer_size * sizeof(char));
@@ -84,11 +84,38 @@ int main(int argc, char *argv[]) {
         getline(&buffer, &buffer_size, stdin);
         
 
-        // TODO: Tokenize user input
+        // Tokenize user input
+        char* tokens[32];
+        char* token;
+        int token_count = 0;
+        while(token_count < 32 && (token = strsep(&buffer," ")) != NULL) {
+            tokens[token_count] = token;
+            token_count++;
+        }
 
 
-        // TODO: Determine outpath (default: stdout)
+        // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
+        int redirIndex = -1;
+        for(int i = 0; i < token_count; i++) {
+            if(strcmp(tokens[i], ">") == 0) {
+                if(redirIndex != -1) {
+                    write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                    exit(1);
+                }
+                redirIndex = i;
+            }
+        }
 
+        if(redirIndex != -1) {
+            if(redirIndex != token_count-2) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                exit(1);
+            }
+            if(freopen(tokens[token_count-1],"w",stdout) == NULL) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                exit(1);
+            }
+        }
 
         // TODO: Run corresponding command and check for valid command
             // TODO: Check for empty command
