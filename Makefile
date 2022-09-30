@@ -1,7 +1,8 @@
 OBJS = wish.o builtIns.o utils.o
+CFLAGS = -g
 
 wish : $(OBJS)
-	gcc -o wish $(OBJS)
+	gcc -o wish $(OBJS) $(FLAGS)
 
 wish.o : wish.c builtIns.h utils.h
 

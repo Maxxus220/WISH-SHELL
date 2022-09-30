@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
     // ---SHELL STATE VARIABLES---
 
     int batchMode = 0;
+    int outFD = STDOUT;
 
 
     // ---SHELL INPUT SETUP---
@@ -56,13 +57,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // if(DEBUG) {
-    //     size_t size = 10;
-    //     char* str = malloc(size);
-    //     getline(&str,&size,stdin);
-    //     printf("%s\n",str);
-    // }
-
 
     // ---MAIN SHELL LOOP---
 
@@ -82,24 +76,23 @@ int main(int argc, char *argv[]) {
         }
 
         getline(&buffer, &buffer_size, stdin);
-        
+
 
         // Tokenize user input
         char* tokens[32];
         char* token;
         int token_count = 0;
-        while(token_count < 32 && (token = strsep(&buffer," ")) != NULL) {
+        while(token_count < 32 && (token = strsep(&buffer," ")) != NULL && strcmp(token, "\n") != 0) {
             tokens[token_count] = token;
             token_count++;
         }
 
 
         // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
-        // TODO: Need to reset stdout after each loop
         int redirIndex = -1;
         for(int i = 0; i < token_count; i++) {
             if(strcmp(tokens[i], ">") == 0) {
-                if(redirIndex != -1) {
+                if(redirIndex != -1 || i == 0) {
                     write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                     exit(1);
                 }
@@ -112,17 +105,17 @@ int main(int argc, char *argv[]) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 exit(1);
             }
-            if(freopen(tokens[token_count-1],"w",stdout) == NULL) {
+            
+            tokens[token_count-1][strcspn(tokens[token_count-1], "\n")] = 0;
+            FILE* out = NULL;
+            if((out = fopen(tokens[token_count-1], "w")) == NULL) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 exit(1);
             }
+            outFD = fileno(out);
+
         }
 
-        if(DEBUG) {
-            for(int i = 0; i < token_count; i++) {
-                printf("%s\n",tokens[i]);
-            }
-        }
 
         // TODO: Run corresponding command and check for valid command
             // TODO: Check for empty command
@@ -140,8 +133,13 @@ int main(int argc, char *argv[]) {
 
         // TODO: Handle code returned by command
 
-        // if(DEBUG) {
-        //     exit(0);
-        // }
+
+        // ---CLEAN-UP LOOP---
+
+        // Reset outFD and close redirect file
+        if(redirIndex > -1 && redirIndex == token_count-2) {
+            close(outFD);
+            outFD = STDOUT;
+        }
     }
 }
