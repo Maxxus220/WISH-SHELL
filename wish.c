@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
 
 
         // ---COMMAND HANDLING---
+
         char* command = tokens[0];
         int return_code = -1;
         // TODO: Run corresponding command and check for valid command
@@ -146,9 +147,6 @@ int main(int argc, char *argv[]) {
         else {
             // TODO: How to run user commands?
         }
-        
-
-
 
         // TODO: Handle code returned by command
 
