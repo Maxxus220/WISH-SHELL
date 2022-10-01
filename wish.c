@@ -1,3 +1,5 @@
+// TODO: Write tests/theory craft tests (try to think blackbox)
+
 // ---INCLUDES---
 
 #include "builtIns.h"
@@ -87,8 +89,15 @@ int main(int argc, char *argv[]) {
             token_count++;
         }
 
+        // Skip to next prompt if empty line
+        if(token_count == 0) continue;
+
+        // Remove new line from tokens
+        tokens[token_count-1][strcspn(tokens[token_count-1], "\n")] = 0;
+
 
         // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
+
         int redirIndex = -1;
         for(int i = 0; i < token_count; i++) {
             if(strcmp(tokens[i], ">") == 0) {
@@ -106,7 +115,6 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
             
-            tokens[token_count-1][strcspn(tokens[token_count-1], "\n")] = 0;
             FILE* out = NULL;
             if((out = fopen(tokens[token_count-1], "w")) == NULL) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
@@ -117,18 +125,28 @@ int main(int argc, char *argv[]) {
         }
 
 
+        // ---COMMAND HANDLING---
+        char* command = tokens[0];
+        int return_code = -1;
         // TODO: Run corresponding command and check for valid command
-            // TODO: Check for empty command
+        
+        // Built In Commands
+        if(strcmp(command, "exit") == 0) {
+            exit(0);
+        }
+        else if(strcmp(command, "cd") == 0) {
+            return_code = shell_cd(&tokens[1]);
+        }
+        else if(strcmp(command, "path") == 0) {
+            return_code = shell_path(&tokens[1]);
+        }
 
-            // ---BUILT-IN COMMANDS---
+        // User Commands
+        else {
+            // TODO: How to run user commands?
+        }
+        
 
-                // TODO: exit command
-
-                // TODO: cd command
-
-                // TODO: path command
-
-            // ---USER COMMANDS---
 
 
         // TODO: Handle code returned by command
