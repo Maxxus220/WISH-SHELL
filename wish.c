@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
         // ---USER INPUT---
 
         // Check for EOF
+        // TODO: Make test for eof/figure out how to do that
         if(feof(stdin)) {
             exit(0);
         }
