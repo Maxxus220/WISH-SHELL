@@ -137,18 +137,34 @@ int main(int argc, char *argv[]) {
             exit(0);
         }
         else if(strcmp(command, "cd") == 0) {
-            return_code = shell_cd(&tokens[1]);
+            shell_cd(&tokens[1]);
         }
         else if(strcmp(command, "path") == 0) {
-            return_code = shell_path(&tokens[1]);
+            shell_path(&tokens[1]);
         }
 
         // User Commands
         else {
-            // TODO: How to run user commands?
-        }
 
-        // TODO: Handle code returned by command
+            // Check that command is valid
+            if(access(tokens[0],F_OK) == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                exit(1);
+            }
+
+            // Change stdout if redir
+
+            // Execute command
+            char * exec_tokens[token_count+1];
+            for(int i = 0; i < token_count; i++) {
+                exec_tokens[i] = tokens[i];
+            }
+            exec_tokens[token_count] = NULL;
+            execv(exec_tokens);
+
+            //Reset stdout
+
+        }
 
 
         // ---CLEAN-UP LOOP---
