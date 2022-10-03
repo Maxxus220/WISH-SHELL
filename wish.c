@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
             if(strcmp(tokens[i], ">") == 0) {
                 if(redirIndex != -1 || i == 0) {
                     write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                    exit(1);
+                    continue;
                 }
                 redirIndex = i;
             }
@@ -113,13 +113,13 @@ int main(int argc, char *argv[]) {
         if(redirIndex != -1) {
             if(redirIndex != token_count-2) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                exit(1);
+                continue;
             }
             
             FILE* out = NULL;
             if((out = fopen(tokens[token_count-1], "w")) == NULL) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                exit(1);
+                continue;
             }
             outFD = fileno(out);
 
@@ -147,20 +147,32 @@ int main(int argc, char *argv[]) {
         else {
 
             // Check that command is valid
-            if(access(tokens[0],F_OK) == -1) {
+            // TODO: Check path and locate first valid location if none found exit
+            char file[255];
+            strcat(file, "./");
+            strcat(file, tokens[0]);
+            if(access(file,X_OK) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                exit(1);
+                continue;
             }
 
             // Change stdout if redir
 
             // Execute command
-            char * exec_tokens[token_count+1];
-            for(int i = 0; i < token_count; i++) {
-                exec_tokens[i] = tokens[i];
+            char * exec_tokens[token_count];
+            for(int i = 0; i < token_count-1; i++) {
+                exec_tokens[i+1] = tokens[i+1];
             }
             exec_tokens[token_count] = NULL;
-            execv(exec_tokens);
+            int fork_code = fork();
+            if(fork_code == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
+            else if(fork_code > 0) waitpid(fork_code);
+            else if(fork_code == 0) {
+                execv(tokens[0], exec_tokens);
+            }
 
             //Reset stdout
 
@@ -168,6 +180,7 @@ int main(int argc, char *argv[]) {
 
 
         // ---CLEAN-UP LOOP---
+        // TODO: Make sure cleanup works on errors as well
 
         // Reset outFD and close redirect file
         if(redirIndex > -1 && redirIndex == token_count-2) {
