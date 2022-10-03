@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 
 // ---DEFINES---
@@ -27,7 +28,12 @@ int main(int argc, char *argv[]) {
 
     // ---SHELL STATE VARIABLES---
 
+    char** path = malloc(1 * sizeof(char*));
+    path[0] = "./bin/";
+    int path_size = 1;
+
     int batchMode = 0;
+
     int outFD = STDOUT;
 
 
@@ -85,7 +91,7 @@ int main(int argc, char *argv[]) {
         char* tokens[32];
         char* token;
         int token_count = 0;
-        while(token_count < 32 && (token = strsep(&buffer," ")) != NULL && strcmp(token, "\n") != 0) {
+        while(token_count < 32 && (token = strsep(&buffer," \t")) != NULL && strcmp(token, "\n") != 0 && *token != '\0') {
             tokens[token_count] = token;
             token_count++;
         }
@@ -110,13 +116,13 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        FILE* out = NULL;
         if(redirIndex != -1) {
             if(redirIndex != token_count-2) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
             
-            FILE* out = NULL;
             if((out = fopen(tokens[token_count-1], "w")) == NULL) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
@@ -142,40 +148,63 @@ int main(int argc, char *argv[]) {
         else if(strcmp(command, "path") == 0) {
             shell_path(&tokens[1]);
         }
+        else if(strcmp(command, "if") == 0) {
+            shell_if(&tokens[1]);
+        }
 
         // User Commands
         else {
 
-            // Check that command is valid
-            // TODO: Check path and locate first valid location if none found exit
+            // Check path for valid command
             char file[255];
-            strcat(file, "./");
-            strcat(file, tokens[0]);
-            if(access(file,X_OK) == -1) {
+            memset(file,0,sizeof(file));
+            for(int i = 0; i < path_size; i++) {
+                strcat(file, path[i]);
+                strcat(file, command);
+                if(access(file,X_OK) == 0) {
+                    break;
+                }
+                memset(file,0,sizeof(file));
+            }
+            // User command not in path
+            if(file[0] == '\0') {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
 
-            // Change stdout if redir
 
-            // Execute command
+            // Change stdout if redir
+            int save_stdout = 0;
+            if(redirIndex != -1) {
+                save_stdout = dup(STDOUT);
+                dup2(outFD, STDOUT);
+            }       
+
+            // Setup argv for program call
             char * exec_tokens[token_count];
             for(int i = 0; i < token_count-1; i++) {
-                exec_tokens[i+1] = tokens[i+1];
+                exec_tokens[i] = tokens[i+1];
             }
-            exec_tokens[token_count] = NULL;
+            exec_tokens[token_count-1] = NULL;
+
+            // Fork shell to replace child with user process
             int fork_code = fork();
             if(fork_code == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
-            else if(fork_code > 0) waitpid(fork_code);
+            else if(fork_code > 0) wait(NULL);
             else if(fork_code == 0) {
-                execv(tokens[0], exec_tokens);
+                if(execv(file, exec_tokens) == -1) {
+                    write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                    exit(1);
+                }
             }
 
-            //Reset stdout
-
+            // Reset stdout
+            if(redirIndex != -1) {
+                dup2(save_stdout, STDOUT);
+            }
         }
 
 

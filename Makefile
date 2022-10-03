@@ -1,6 +1,6 @@
 OBJS = wish.o builtIns.o utils.o
 CFLAGS = -g
-USER_COMMANDS = test
+USER_COMMANDS = ./bin/test
 
 wish : $(OBJS) $(USER_COMMANDS)
 	gcc -o wish $(OBJS) $(FLAGS)
@@ -11,8 +11,8 @@ builtIns.o : builtIns.c builtIns.h
 
 utils.o : utils.c utils.h
 
-test : test.c
-	gcc -o test test.c
+./bin/test : ./bin/test.c
+	gcc -o ./bin/test ./bin/test.c
 
 .PHONY : clean
 clean :
