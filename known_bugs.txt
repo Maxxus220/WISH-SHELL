@@ -1,0 +1,2 @@
+-Issues with whitespace in commands i.e. test      >    outfile.txt
+-Issues running batch file (error) i.e. test\n test > outfile.txt\n test\n exit\n

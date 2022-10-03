@@ -140,16 +140,28 @@ int main(int argc, char *argv[]) {
         
         // Built In Commands
         if(strcmp(command, "exit") == 0) {
-            exit(0);
+            if(shell_exit(&tokens[1]) == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
         }
         else if(strcmp(command, "cd") == 0) {
-            shell_cd(&tokens[1]);
+            if(shell_cd(&tokens[1]) == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
         }
         else if(strcmp(command, "path") == 0) {
-            shell_path(&tokens[1]);
+            if(shell_path(&tokens[1]) == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
         }
         else if(strcmp(command, "if") == 0) {
-            shell_if(&tokens[1]);
+            if(shell_if(&tokens[1]) == -1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
         }
 
         // User Commands

@@ -1,0 +1,4 @@
+test
+test > outfile2.txt
+test
+exit
