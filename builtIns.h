@@ -4,6 +4,6 @@
 
 int shell_cd(char*[]);
 
-int shell_path(char*[]);
+int shell_path(char*[], int, char**, int*);
 
-int shell_if(char*[]);
+int shell_if(char*[], int);

@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
         // ---WISH PROMPT---
         if(!batchMode) {
-            printf("wish>");
+            printf("wish> ");
         }
 
 
@@ -140,25 +140,30 @@ int main(int argc, char *argv[]) {
         
         // Built In Commands
         if(strcmp(command, "exit") == 0) {
-            if(shell_exit(&tokens[1]) == -1) {
+            if(token_count-1 > 0) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
+            exit(0);
         }
         else if(strcmp(command, "cd") == 0) {
+            if(token_count-1 == 0 || token_count-1 > 1) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
             if(shell_cd(&tokens[1]) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
         }
         else if(strcmp(command, "path") == 0) {
-            if(shell_path(&tokens[1]) == -1) {
+            if(shell_path(&tokens[1], token_count-1, path, &path_size) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
         }
         else if(strcmp(command, "if") == 0) {
-            if(shell_if(&tokens[1]) == -1) {
+            if(shell_if(&tokens[1], token_count-1) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
