@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     // ---SHELL INPUT SETUP---
 
-    size_t buffer_size = 32;
+    size_t buffer_size = 255;
     char* buffer = malloc(buffer_size * sizeof(char));
     if(buffer == NULL) {
         write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
@@ -90,10 +90,13 @@ int main(int argc, char *argv[]) {
         // Tokenize user input
         char* tokens[32];
         char* token;
+        char delimeters[2] = {' ', '\t'};
         int token_count = 0;
-        while(token_count < 32 && (token = strsep(&buffer," \t")) != NULL && strcmp(token, "\n") != 0 && *token != '\0') {
+        token = strtok(buffer,delimeters);
+        while(token_count < 32 && token != NULL && strcmp(token, "\n") != 0 && *token != '\0') {
             tokens[token_count] = token;
             token_count++;
+            token = strtok(NULL,delimeters);
         }
 
         // Skip to next prompt if empty line
