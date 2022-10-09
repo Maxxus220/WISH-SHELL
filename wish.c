@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
             }
         }
         else if(strcmp(command, "if") == 0) {
-            if(shell_if(&tokens[1], token_count-1) == -1) {
+            if(shell_if(&tokens[1], token_count-1, path, &path_size) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
