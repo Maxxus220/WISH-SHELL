@@ -1,4 +1,4 @@
-test
-test > outfile2.txt
-test
+ls
+ls > outfile2.txt
+ls
 exit

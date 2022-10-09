@@ -4,3 +4,4 @@
 
 void cleanUp(void);
 
+char** tokenize(char *, int*);

@@ -1,0 +1,16 @@
+bin
+bin2
+builtIns.c
+builtIns.h
+builtIns.o
+known_bugs.txt
+Makefile
+outfile2.txt
+test_batch.txt
+tests-out
+utils.c
+utils.h
+utils.o
+wish
+wish.c
+wish.o

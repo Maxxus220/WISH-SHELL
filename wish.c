@@ -20,6 +20,7 @@
 
 int main(int argc, char *argv[]) {
 
+
     // ---CONSTS---
 
     const char ERROR_MESSAGE[30] = "An error has occurred\n";
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]) {
     // ---SHELL STATE VARIABLES---
 
     char** path = malloc(1 * sizeof(char*));
-    path[0] = "./bin/";
+    path[0] = "/bin/";
     int path_size = 1;
 
     int batchMode = 0;
@@ -78,25 +79,22 @@ int main(int argc, char *argv[]) {
 
         // ---USER INPUT---
 
+        getline(&buffer, &buffer_size, stdin);
+
         // Check for EOF
         // TODO: Make test for eof/figure out how to do that
         if(feof(stdin)) {
             exit(0);
         }
 
-        getline(&buffer, &buffer_size, stdin);
-
 
         // Tokenize user input
-        char* tokens[32];
-        char* token;
-        char delimeters[2] = {' ', '\t'};
+        char** tokens;
         int token_count = 0;
-        token = strtok(buffer,delimeters);
-        while(token_count < 32 && token != NULL && strcmp(token, "\n") != 0 && *token != '\0') {
-            tokens[token_count] = token;
-            token_count++;
-            token = strtok(NULL,delimeters);
+        tokens = tokenize(buffer, &token_count);
+        if(tokens == NULL) {
+            write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+            continue;
         }
 
         // Skip to next prompt if empty line
@@ -113,7 +111,7 @@ int main(int argc, char *argv[]) {
             if(strcmp(tokens[i], ">") == 0) {
                 if(redirIndex != -1 || i == 0) {
                     write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                    continue;
+                    exit(0);
                 }
                 redirIndex = i;
             }
@@ -131,7 +129,9 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             outFD = fileno(out);
-
+            
+            tokens[redirIndex] = "\0";
+            token_count = token_count - 2;
         }
 
 
@@ -201,11 +201,12 @@ int main(int argc, char *argv[]) {
             }       
 
             // Setup argv for program call
-            char * exec_tokens[token_count];
-            for(int i = 0; i < token_count-1; i++) {
-                exec_tokens[i] = tokens[i+1];
+            char * exec_tokens[token_count+1];
+            for(int i = 0; i < token_count; i++) {
+                exec_tokens[i] = malloc(strlen(tokens[i]));
+                strcpy(exec_tokens[i],tokens[i]);
             }
-            exec_tokens[token_count-1] = NULL;
+            exec_tokens[token_count] = NULL;
 
             // Fork shell to replace child with user process
             int fork_code = fork();
