@@ -27,18 +27,19 @@ char** tokenize(char *str, int *sizeDest) {
     while(str[i] != '\0') {
         if(isToken && (str[i] == ' ' || str[i] == '\t')) {
             temp[size] = '\0';
-            arr[j] = malloc(strlen(temp) + 1);
+            arr[j] = malloc(size+1);
             strcpy(arr[j], temp);
-            arr[j][size] = '\0';
             isToken = 0;
             j++;
             size = 0;
         }
         else if(str[i] == '>') {
-            temp[size] = '\0';
-            arr[j] = malloc(strlen(temp) + 1);
-            strcpy(arr[j], temp);
-            j++;
+            if(isToken) {
+                temp[size] = '\0';
+                arr[j] = malloc(size+1);
+                strcpy(arr[j], temp);
+                j++;
+            }
             arr[j] = ">";
             j++;
             size = 0;
@@ -46,9 +47,8 @@ char** tokenize(char *str, int *sizeDest) {
         }
         else if(str[i] == '\n' || str[i] == '\r') {
             temp[size] = '\0';
-            arr[j] = malloc(strlen(temp) + 1);
+            arr[j] = malloc(size+1);
             strcpy(arr[j], temp);
-            arr[j][size] = '\0';
             if(isToken) j++;
             break;
         }

@@ -31,10 +31,13 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
     }
     int equals = -1;
 
-    // Find index of != or == TODO: Change to for loop to avoid segfault on bad input or just check for fi
+    // Find index of != or ==
     int i = 1;
     while(strcmp(args[i],"!=") != 0 && strcmp(args[i],"==") != 0) {
         i++;
+        if(i == argc) {
+            return -1;
+        }
     }
 
     // Determine operator
@@ -45,17 +48,17 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
     int firstCommandReturn = -1;
     char* built_args[i];
     for(int j = 1; j < i; j++) {
-        built_args[j-1] = malloc(strlen(args[j]));
+        built_args[j-1] = malloc(strlen(args[j]) + 1);
         strcpy(built_args[j-1],args[j]);
     }
     if(strcmp(args[0],"if") == 0) {
-        firstCommandReturn = shell_if(built_args, i, path, path_size);
+        firstCommandReturn = shell_if(built_args, i-1, path, path_size);
     }
     else if(strcmp(args[0],"cd") == 0) {
         firstCommandReturn = shell_cd(built_args);
     }
     else if(strcmp(args[0],"path") == 0) {
-        firstCommandReturn = shell_path(built_args, i, path, path_size);
+        firstCommandReturn = shell_path(built_args, i-1, path, path_size);
     }
     // else if(strcmp(args[0],"exit") == 0) {
     //     exit(0);
@@ -97,7 +100,7 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
                 new_args[j] = malloc(strlen(args[j]));
                 strcpy(new_args[j],args[j]);
             }
-            new_args[i] = "\0";
+            new_args[i] = NULL;
             if(execv(file, new_args) == -1) {
                 return -1;
             }
@@ -128,19 +131,19 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
     }
 
     // Run 2nd command
-    built_args[argc-(i+2)];
-    for(int j = 0; j < argc-(i+2); j++) {
-        built_args[j] = malloc(strlen(args[i+4+j]));
-        strcpy(built_args[j],args[i+4+j]);
+    char *built2_args[argc-(i+5)];
+    for(int j = 0; j < argc-(i+5); j++) {
+        built2_args[j] = malloc(strlen(args[i+4+j]) + 1);
+        strcpy(built2_args[j],args[i+4+j]);
     }
     if(strcmp(args[i+3],"if") == 0) {
-        shell_if(built_args, argc-(i+2), path, path_size);
+        shell_if(built2_args, argc-(i+2), path, path_size);
     }
     else if(strcmp(args[i+3],"cd") == 0) {
-        shell_cd(built_args);
+        shell_cd(built2_args);
     }
     else if(strcmp(args[i+3],"path") == 0) {
-        shell_path(built_args, argc-(i+2), path, path_size);
+        shell_path(built2_args, argc-(i+2), path, path_size);
     }
     else {
         int fork_code = fork();
@@ -172,17 +175,17 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
             }
 
             // Create argv
-            char* new_args[argc-(i+2)+1];
-            for(int j = 0; j < argc-(i+2); j++) {
-                new_args[j] = malloc(strlen(args[i+3+j]));
+            char* new_args[argc-(i+3)];
+            for(int j = 0; j < argc-(i+4); j++) {
+                new_args[j] = malloc(strlen(args[i+3+j]) + 1);
                 strcpy(new_args[j],args[i+3+j]);
             }
-            new_args[argc-(i+2)] = "\0";
+            new_args[argc-(i+4)] = NULL;
             if(execv(file, new_args) == -1) {
                 return -1;
             }
         }
     }
     
-    return -1;
+    return 0;
 }

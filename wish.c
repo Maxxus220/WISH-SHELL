@@ -101,7 +101,9 @@ int main(int argc, char *argv[]) {
         if(token_count == 0) continue;
 
         // Remove new line from tokens
-        tokens[token_count-1][strcspn(tokens[token_count-1], "\n")] = 0;
+        if(strchr(tokens[token_count-1], '\n') != NULL) {
+            tokens[token_count-1][strcspn(tokens[token_count-1], "\n")] = 0;
+        }
 
 
         // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
@@ -121,7 +123,7 @@ int main(int argc, char *argv[]) {
         if(redirIndex != -1) {
             if(redirIndex != token_count-2) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                continue;
+                exit(0);
             }
             
             if((out = fopen(tokens[token_count-1], "w")) == NULL) {
@@ -166,6 +168,10 @@ int main(int argc, char *argv[]) {
             }
         }
         else if(strcmp(command, "if") == 0) {
+            if(token_count-1 == 0) {
+                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                continue;
+            }
             if(shell_if(&tokens[1], token_count-1, path, &path_size) == -1) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
