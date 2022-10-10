@@ -107,33 +107,34 @@ int main(int argc, char *argv[]) {
 
 
         // ---CHECK FOR REDIRECT/DETERMINE OUTPATH (DEFAULT: stdout)---
-
         int redirIndex = -1;
-        for(int i = 0; i < token_count; i++) {
-            if(strcmp(tokens[i], ">") == 0) {
-                if(redirIndex != -1 || i == 0) {
+        if(strcmp(tokens[token_count-1],"fi") != 0) {
+            for(int i = 0; i < token_count; i++) {
+                if(strcmp(tokens[i], ">") == 0) {
+                    if(redirIndex != -1 || i == 0) {
+                        write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                        exit(0);
+                    }
+                    redirIndex = i;
+                }
+            }
+
+            FILE* out = NULL;
+            if(redirIndex != -1) {
+                if(redirIndex != token_count-2) {
                     write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                     exit(0);
                 }
-                redirIndex = i;
+                
+                if((out = fopen(tokens[token_count-1], "w")) == NULL) {
+                    write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
+                    continue;
+                }
+                outFD = fileno(out);
+                
+                tokens[redirIndex] = "\0";
+                token_count = token_count - 2;
             }
-        }
-
-        FILE* out = NULL;
-        if(redirIndex != -1) {
-            if(redirIndex != token_count-2) {
-                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                exit(0);
-            }
-            
-            if((out = fopen(tokens[token_count-1], "w")) == NULL) {
-                write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
-                continue;
-            }
-            outFD = fileno(out);
-            
-            tokens[redirIndex] = "\0";
-            token_count = token_count - 2;
         }
 
 
@@ -168,7 +169,7 @@ int main(int argc, char *argv[]) {
             }
         }
         else if(strcmp(command, "if") == 0) {
-            if(token_count-1 == 0) {
+            if(token_count-1 < 5) {
                 write(STDERR_FILENO, ERROR_MESSAGE, strlen(ERROR_MESSAGE));
                 continue;
             }
@@ -245,3 +246,4 @@ int main(int argc, char *argv[]) {
         }
     }
 }
+

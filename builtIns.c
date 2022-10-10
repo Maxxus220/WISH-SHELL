@@ -31,14 +31,27 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
     }
     int equals = -1;
 
+
+
     // Find index of != or ==
-    int i = 1;
-    while(strcmp(args[i],"!=") != 0 && strcmp(args[i],"==") != 0) {
-        i++;
-        if(i == argc) {
-            return -1;
+    int numIfs = 1;
+    int numHits = 0;
+    int i = -1;
+    for(int j = 0; j < argc; j++) {
+        if(strcmp(args[j],"if") == 0) {
+            numIfs++;
+        }
+        else if(strcmp(args[j],"!=") == 0 || strcmp(args[j],"==") == 0) {
+            i = j;
+            numHits++;
+        }
+        if(numIfs == numHits) {
+            break;
         }
     }
+    if(i == -1) {
+            return -1;
+        }
 
     // Determine operator
     if(strcmp(args[i],"!=") == 0) equals = 0;
@@ -130,20 +143,60 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
         return -1;
     }
 
+    // Check there is a second command
+    if(strcmp(args[i+3],"fi") == 0) {
+        return 0;
+    }
+
+    // Redirect
+    int redirIndex = -1;
+    for(int k = 0; k < argc; k++) {
+        if(strcmp(args[k], ">") == 0) {
+            if(redirIndex != -1 || k == 0) {
+                return -1;
+            }
+            redirIndex = k;
+        }
+    }
+
+    FILE* out = NULL;
+    int outFD;
+    if(redirIndex != -1) {
+        if(redirIndex != argc-3) {
+            return -1;
+        }
+        
+        if((out = fopen(args[argc-2], "w")) == NULL) {
+            return -1;
+        }
+        outFD = fileno(out);
+        
+        argc -= 2;
+        args[argc-1] = NULL;
+    }
+
+    // Change stdout
+    int save_stdout = 0;
+    if(redirIndex != -1) {
+        save_stdout = dup(1);
+        dup2(outFD, 1);
+    }     
+
     // Run 2nd command
+    int returnCode = -1;
     char *built2_args[argc-(i+5)];
     for(int j = 0; j < argc-(i+5); j++) {
         built2_args[j] = malloc(strlen(args[i+4+j]) + 1);
         strcpy(built2_args[j],args[i+4+j]);
     }
     if(strcmp(args[i+3],"if") == 0) {
-        shell_if(built2_args, argc-(i+2), path, path_size);
+        returnCode = shell_if(built2_args, argc-(i+5), path, path_size);
     }
     else if(strcmp(args[i+3],"cd") == 0) {
-        shell_cd(built2_args);
+        returnCode = shell_cd(built2_args);
     }
     else if(strcmp(args[i+3],"path") == 0) {
-        shell_path(built2_args, argc-(i+2), path, path_size);
+        returnCode = shell_path(built2_args, argc-(i+5), path, path_size);
     }
     else {
         int fork_code = fork();
@@ -153,7 +206,7 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
         }
         else if(fork_code > 0) {
             wait(NULL);
-            return 0;
+            returnCode = 0;
         }
         else if(fork_code == 0) {
 
@@ -186,6 +239,10 @@ int shell_if(char* args[], int argc, char **path, int *path_size) {
             }
         }
     }
+    if(redirIndex != -1) {
+        dup2(save_stdout, 1);
+        close(outFD);
+    }
     
-    return 0;
+    return returnCode;
 }
